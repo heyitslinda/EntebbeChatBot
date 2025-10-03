@@ -22,8 +22,8 @@ const messagesDiv = document.getElementById('messages');
 const userInput = document.getElementById('userInput');
 const typingDiv = document.getElementById('typing');
 
-// Use your Render deployment URL here, e.g., https://your-app.onrender.com/webhook
-const WEBHOOK_URL = '/webhook';
+// Use your deployed URL
+const WEBHOOK_URL = 'https://entebbechatbot-1.onrender.com/webhook';
 
 // Bubble color classes by intent
 const intentClasses = {
@@ -33,20 +33,30 @@ const intentClasses = {
     'Transport Info': 'transport-info'
 };
 
+// Append messages with emoji icons
 function appendMessage(sender, text, intent='') {
     const msgDiv = document.createElement('div');
     msgDiv.className = 'message ' + sender;
+
+    // Bubble color for bot
     if (sender === 'bot' && intent) msgDiv.classList.add(intentClasses[intent] || '');
-    
+
     const iconSpan = document.createElement('span');
-    iconSpan.style.fontSize = '20px';
+    iconSpan.style.fontSize = '18px';
+    iconSpan.style.marginRight = '8px';
 
     if (sender === 'user') {
         iconSpan.textContent = '🧑';
         msgDiv.appendChild(document.createTextNode(text));
         msgDiv.appendChild(iconSpan);
     } else {
-        iconSpan.textContent = '✈️';
+        switch(intent) {
+            case 'Flight Status': iconSpan.textContent = '✈️'; break;
+            case 'Navigation': iconSpan.textContent = '🏢'; break;
+            case 'Baggage Info': iconSpan.textContent = '🧳'; break;
+            case 'Transport Info': iconSpan.textContent = '🚕'; break;
+            default: iconSpan.textContent = '🤖';
+        }
         msgDiv.appendChild(iconSpan);
         msgDiv.appendChild(document.createTextNode(text));
     }
@@ -55,28 +65,24 @@ function appendMessage(sender, text, intent='') {
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
-// Detect parameters from user input
+// Detect parameters
 function getParameters(text) {
     const params = {};
 
-    // Flight number detection
     const flightRegex = /\b([A-Z]{2}\d{3,4})\b/;
     const match = text.toUpperCase().match(flightRegex);
     if (match) params['flight_number'] = match[1];
 
-    // Baggage detection
     const baggageWords = ['missing','lost','claim','carry','kg','weight'];
     if (baggageWords.some(word => text.toLowerCase().includes(word))) {
         params['baggage_issue'] = text;
     }
 
-    // Navigation detection
     const navWords = ['baggage','terminal','gate','lounge'];
     if (navWords.some(word => text.toLowerCase().includes(word))) {
         params['location'] = text;
     }
 
-    // Transport detection
     const transportWords = ['taxi','bus','shuttle','city to airport','from city'];
     if (transportWords.some(word => text.toLowerCase().includes(word))) {
         params['transport_type'] = text;
