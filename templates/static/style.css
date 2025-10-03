@@ -17,7 +17,12 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    animation: fadeIn 0.5s ease-in-out;
+    animation: popIn 0.5s ease;
+}
+
+@keyframes popIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
 }
 
 #chat-header {
@@ -27,22 +32,19 @@ body {
     text-align: center;
     font-size: 20px;
     font-weight: bold;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
 }
 
 #messages {
     flex: 1;
     padding: 15px;
     overflow-y: auto;
-    display: flex;
-    flex-direction: column;
 }
 
 #typing {
     padding: 0 15px;
     font-style: italic;
     color: gray;
-    height: 20px;
 }
 
 #input-area {
@@ -55,12 +57,9 @@ body {
     border: none;
     padding: 12px;
     font-size: 16px;
-    border-radius: 0;
 }
 
-#userInput:focus {
-    outline: none;
-}
+#userInput:focus { outline: none; }
 
 #sendBtn {
     background-color: #0077cc;
@@ -69,22 +68,19 @@ body {
     padding: 0 20px;
     cursor: pointer;
     font-size: 16px;
-    transition: background 0.3s;
+    transition: 0.3s;
 }
 
-#sendBtn:hover {
-    background-color: #005fa3;
-}
+#sendBtn:hover { background-color: #005fa3; }
 
 .message {
-    margin-bottom: 12px;
-    padding: 10px 14px;
+    margin-bottom: 10px;
+    padding: 8px 12px;
     border-radius: 10px;
     display: flex;
     align-items: center;
     max-width: 80%;
     word-wrap: break-word;
-    animation: popIn 0.3s ease forwards;
 }
 
 .message.user {
@@ -97,30 +93,8 @@ body {
     align-self: flex-start;
 }
 
-/* Intent bubble colors */
-.flight-status {
-    background-color: #d1e7dd !important; /* greenish */
-}
-
-.navigation {
-    background-color: #fff3cd !important; /* yellowish */
-}
-
-.baggage-info {
-    background-color: #f8d7da !important; /* reddish */
-}
-
-.transport-info {
-    background-color: #cff4fc !important; /* bluish */
-}
-
-/* Animations */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-20px);}
-    to { opacity: 1; transform: translateY(0);}
-}
-
-@keyframes popIn {
-    from { opacity: 0; transform: scale(0.95);}
-    to { opacity: 1; transform: scale(1);}
-}
+/* Intent colors */
+.flight-status { background-color: #d1e7dd !important; }
+.navigation { background-color: #fff3cd !important; }
+.baggage-info { background-color: #f8d7da !important; }
+.transport-info { background-color: #cff4fc !important; }

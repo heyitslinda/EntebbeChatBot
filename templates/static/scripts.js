@@ -1,9 +1,9 @@
 const messagesDiv = document.getElementById('messages');
 const userInput = document.getElementById('userInput');
 const typingDiv = document.getElementById('typing');
+const sendBtn = document.getElementById('sendBtn');
 
-// Replace with your Render deployment URL
-const WEBHOOK_URL = 'https://entebbechatbot-1.onrender.com/webhook';
+const WEBHOOK_URL = '/webhook'; // Will work with Render backend
 
 const intentClasses = {
     'Flight Status': 'flight-status',
@@ -16,21 +16,9 @@ function appendMessage(sender, text, intent='') {
     const msgDiv = document.createElement('div');
     msgDiv.className = 'message ' + sender;
     if (sender === 'bot' && intent) msgDiv.classList.add(intentClasses[intent] || '');
-    
-    const iconSpan = document.createElement('span');
-    iconSpan.style.fontSize = '20px';
-
-    if (sender === 'user') {
-        iconSpan.textContent = '🧑';
-        msgDiv.appendChild(document.createTextNode(text));
-        msgDiv.appendChild(iconSpan);
-    } else {
-        iconSpan.textContent = '✈️';
-        msgDiv.appendChild(iconSpan);
-        msgDiv.appendChild(document.createTextNode(text));
-    }
 
     messagesDiv.appendChild(msgDiv);
+    msgDiv.textContent = text;
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
@@ -60,15 +48,7 @@ function sendMessage() {
     userInput.value = '';
     typingDiv.style.display = 'block';
 
-    const params = getParameters(text);
-
-    const payload = {
-        queryResult: {
-            queryText: text,
-            parameters: params,
-            intent: { displayName: '' }
-        }
-    };
+    const payload = { queryResult: { queryText: text, parameters: getParameters(text), intent: { displayName: '' } } };
 
     fetch(WEBHOOK_URL, {
         method: 'POST',
@@ -78,17 +58,14 @@ function sendMessage() {
     .then(res => res.json())
     .then(data => {
         typingDiv.style.display = 'none';
-        const reply = data.fulfillmentText || "Sorry, I didn't understand that.";
-        const intent = data.intent || '';
-        appendMessage('bot', reply, intent);
+        appendMessage('bot', data.fulfillmentText, data.intent);
     })
     .catch(err => {
         typingDiv.style.display = 'none';
-        appendMessage('bot', "Error connecting to chatbot.");
+        appendMessage('bot', 'Error connecting to chatbot.');
         console.error(err);
     });
 }
 
-userInput.addEventListener('keypress', e => {
-    if (e.key === 'Enter') sendMessage();
-});
+sendBtn.addEventListener('click', sendMessage);
+userInput.addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
