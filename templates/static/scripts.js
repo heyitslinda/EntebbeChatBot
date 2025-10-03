@@ -3,7 +3,7 @@ const userInput = document.getElementById('userInput');
 const typingDiv = document.getElementById('typing');
 
 // Set this to your deployed URL later
-const WEBHOOK_URL = '/webhook';
+const WEBHOOK_URL = 'https://entebbechatbot-1.onrender.com/webhook';
 
 function appendMessage(sender, text) {
     const msgDiv = document.createElement('div');
