@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Entebbe Airport Chatbot</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div id="chat-container">
+  <div id="chat-header">Entebbe Airport Chatbot</div>
+  <div id="messages"></div>
+  <div id="typing" style="display:none;">Bot is typing...</div>
+  <div id="input-area">
+    <input type="text" id="userInput" placeholder="Type your message..."/>
+    <button id="sendBtn" onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
