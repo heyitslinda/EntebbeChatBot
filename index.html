@@ -1,147 +1,194 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Entebbe Airport Chatbot</title>
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Leaflet for maps -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #f0f7ff, #dbeafe);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pearlbot</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #e0f2ff, #c7e0ff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
 
+  .chatbot {
+    width: 100%;
+    max-width: 450px;
+    height: 90vh;
+    max-height: 700px;
+    background: #fff;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+  }
+
+  .chatbot:hover {
+    transform: translateY(-4px);
+  }
+
+  .header {
+    background: linear-gradient(90deg, #0d6efd, #6610f2);
+    color: #fff;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .header strong { font-size: 1.1rem; }
+  .weather {
+    font-size: 0.8rem;
+    text-align: right;
+    line-height: 1.2;
+  }
+
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+    background: #f9fafb;
+  }
+
+  .message {
+    display: flex;
+    margin-bottom: 12px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeSlideIn 0.5s ease forwards;
+  }
+  .message.user { justify-content: flex-end; }
+
+  .bubble {
+    padding: 10px 15px;
+    border-radius: 18px;
+    max-width: 80%;
+    font-size: 0.95rem;
+  }
+  .user .bubble {
+    background: #0d6efd;
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  .bot .bubble {
+    background: #e5e7eb;
+    color: #111;
+    border-bottom-left-radius: 4px;
+  }
+
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .typing-indicator {
+    background: #e5e7eb;
+    padding: 10px 14px;
+    border-radius: 18px;
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 10px;
+    animation: fadeSlideIn 0.4s ease forwards;
+  }
+
+  .typing-dots span {
+    height: 8px;
+    width: 8px;
+    background: #555;
+    border-radius: 50%;
+    margin: 0 2px;
+    animation: blink 1.4s infinite both;
+  }
+
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes blink {
+    0%, 80%, 100% { opacity: 0.2; }
+    40% { opacity: 1; }
+  }
+
+  .quick-actions {
+    padding: 10px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    background: #fff;
+  }
+
+  .input-group {
+    border-top: 1px solid #e5e7eb;
+    background: #fff;
+    padding: 10px;
+  }
+
+  .input-group input {
+    border-radius: 20px 0 0 20px;
+  }
+
+  .input-group .btn {
+    border-radius: 0 20px 20px 0;
+  }
+
+  .map-area {
+    height: 300px;
+  }
+
+  @media (max-width: 600px) {
     .chatbot {
-      width: 400px;
-      max-width: 95%;
-      background: #ffffff;
-      border-radius: 20px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      height: 100vh;
+      max-height: none;
+      border-radius: 0;
     }
-    .chatbot:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 15px 50px rgba(0,0,0,0.25);
-    }
-
-    .chatbot .header {
-      background: linear-gradient(90deg, #0d6efd, #6610f2);
-      color: white;
-      padding: 18px;
-      border-bottom: 2px solid #e5e7eb;
-    }
-    .chatbot .header strong {
-      font-size: 1.2rem;
-    }
-
-    .chatbot .messages {
-      flex: 1;
-      overflow-y: auto;
-      background: #f9fafb;
-      padding: 16px;
-    }
-    .message { margin-bottom: 14px; display: flex; }
-    .message.user { justify-content: flex-end; }
-    .message .bubble {
-      padding: 12px 16px;
-      border-radius: 18px;
-      max-width: 75%;
-      line-height: 1.4;
-      font-size: 0.95rem;
-    }
-    .message.user .bubble {
-      background: #0d6efd;
-      color: #fff;
-      border-bottom-right-radius: 4px;
-    }
-    .message.bot .bubble {
-      background: #e5e7eb;
-      color: #111827;
-      border-bottom-left-radius: 4px;
-    }
-
-    .quick-actions {
+    .messages {
       padding: 12px;
-      border-top: 1px solid #e5e7eb;
-      background: #fff;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
     }
-    .quick-actions .btn {
-      border-radius: 20px;
-      font-size: 0.8rem;
-      padding: 6px 12px;
-    }
-
-    .input-group {
-      border-top: 1px solid #e5e7eb;
-      background: #fff;
-      padding: 10px;
-    }
-    .input-group input {
-      border-radius: 20px 0 0 20px;
-    }
-    .input-group .btn {
-      border-radius: 0 20px 20px 0;
-    }
-
-    /* Map modal */
-    .map-area { height: 300px; }
-
-    @media (max-width: 500px) {
-      .chatbot { width: 100%; height: 100vh; border-radius: 0; }
-      .chatbot .messages { height: calc(100vh - 220px); }
-    }
-  </style>
+  }
+</style>
 </head>
 <body>
-
-<!-- Chatbot UI -->
-<div class="chatbot" id="chatbot">
-  <div class="header d-flex align-items-center justify-content-between">
+<div class="chatbot">
+  <div class="header">
     <div>
-      <strong>Entebbe Airport Assistant</strong>
-      <div style="font-size:12px;opacity:0.9">Your travel guide ✈️</div>
+      <strong>PearlBot</strong><br>
+      <small>Your travel guide ✈️</small>
     </div>
-    <div>
-      <button class="btn btn-sm btn-light" id="openMapBtn">🗺</button>
+    <div class="weather" id="weatherBox">
+      🌤️ 28°C<br>💧 Humidity: 70%
     </div>
   </div>
 
-  <div class="messages" id="messages" role="log" aria-live="polite"></div>
+  <div class="messages" id="messages"></div>
 
   <div class="quick-actions">
     <button class="btn btn-outline-primary btn-sm" onclick="quick('flight status')">Flight status</button>
-    <button class="btn btn-outline-primary btn-sm" onclick="quick('terminal map')">Terminal map</button>
-    <button class="btn btn-outline-primary btn-sm" onclick="quick('transport to Kampala')">Transport to Kampala</button>
-    <button class="btn btn-outline-primary btn-sm" onclick="quick('baggage claim')">Baggage claim</button>
+    <button class="btn btn-outline-primary btn-sm" onclick="quick('directions to gate 5')">Gate 5 Directions</button>
+    <button class="btn btn-outline-primary btn-sm" onclick="quick('restaurants nearby')">Restaurants</button>
+    <button class="btn btn-outline-primary btn-sm" onclick="quick('transport to Kampala')">Transport</button>
   </div>
 
   <div class="input-group">
-    <input id="input" type="text" class="form-control" placeholder="Ask about flights, navigation, services...">
+    <input id="input" type="text" class="form-control" placeholder="Ask about flights, navigation, or weather...">
     <button class="btn btn-primary" id="sendBtn">Send</button>
   </div>
 </div>
 
-<!-- Hidden map modal -->
+<!-- Map Modal -->
 <div class="modal fade" id="mapModal" tabindex="-1">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Entebbe Airport Map</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <div id="map" class="map-area"></div>
@@ -150,18 +197,16 @@
   </div>
 </div>
 
-<!-- Bootstrap + Leaflet -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <script>
 const messagesEl = document.getElementById('messages');
 const input = document.getElementById('input');
 const sendBtn = document.getElementById('sendBtn');
 
-function pushMessage(text, who='bot'){
+function pushMessage(text, who='bot') {
   const wrap = document.createElement('div');
-  wrap.className = 'message '+who;
+  wrap.className = 'message ' + who;
   const bubble = document.createElement('div');
   bubble.className = 'bubble';
   bubble.innerHTML = text;
@@ -170,55 +215,78 @@ function pushMessage(text, who='bot'){
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
-function userSend(){
-  const v = input.value.trim();
-  if(!v) return;
-  pushMessage(v,'user');
-  input.value='';
-  handleQuery(v.toLowerCase());
+function showTyping() {
+  const t = document.createElement('div');
+  t.className = 'typing-indicator';
+  t.id = 'typing';
+  t.innerHTML = '✈️ Assistant is typing <div class="typing-dots"><span></span><span></span><span></span></div>';
+  messagesEl.appendChild(t);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
-sendBtn.addEventListener('click', userSend);
-input.addEventListener('keydown', e=>{ if(e.key==='Enter') userSend(); });
+function hideTyping() {
+  const t = document.getElementById('typing');
+  if (t) t.remove();
+}
 
+function userSend() {
+  const val = input.value.trim();
+  if (!val) return;
+  pushMessage(val, 'user');
+  input.value = '';
+  handleQuery(val.toLowerCase());
+}
+
+sendBtn.onclick = userSend;
+input.addEventListener('keydown', e => { if (e.key === 'Enter') userSend(); });
 function quick(q){ input.value=q; userSend(); }
 
-function handleQuery(q){
-  if(q.includes('flight')){
-    pushMessage('Here is the latest flight info (demo):<br>✈️ UG123 — On-time<br>✈️ KQ432 — Departed<br>✈️ QR324 — Landed');
-    return;
-  }
-  if(q.includes('map')){
-    pushMessage('Opening terminal map...');
-    const mapModal = new bootstrap.Modal(document.getElementById('mapModal'));
-    mapModal.show();
-    setTimeout(initMap, 300);
-    return;
-  }
-  if(q.includes('kampala') || q.includes('transport')){
-    pushMessage('🚕 You can take a taxi, shuttle, or bus via the Expressway to Kampala (~40–60 mins).');
-    return;
-  }
-  if(q.includes('baggage')){
-    pushMessage('🧳 Baggage claim is at the arrivals terminal. For assistance, check airline desks near Belt 3.');
-    return;
-  }
-  pushMessage('I can help with: Flight status, Terminal maps, Navigation, Baggage claim.');
+function handleQuery(q) {
+  showTyping();
+  setTimeout(() => {
+    hideTyping();
+
+    if (q.includes('flight')) {
+      pushMessage('Here’s an example of flight updates:<br>✈️ KQ432 — Departed<br>✈️ QR324 — Landed<br>✈️ UG123 — On Time');
+    } 
+    else if (q.includes('weather')) {
+      pushMessage('🌤️ Current weather in Entebbe: 28°C, humidity 70%, light breeze from Lake Victoria.');
+    } 
+    else if (q.includes('gate')) {
+      pushMessage('🧭 Follow signs from the main hall → turn left → proceed 100m to Gate 5.');
+      openMap();
+    } 
+    else if (q.includes('restaurant')) {
+      pushMessage('🍴 Nearest restaurants: Java House (Departures), Café Javas (Arrivals), Victoria Lounge.');
+    }
+    else if (q.includes('kampala') || q.includes('transport')) {
+      pushMessage('🚗 Options: Airport Taxi (UGX 80k–120k), Shuttle (45 mins), or Airport Express Bus.');
+    } 
+    else {
+      pushMessage('I can assist with flights, weather, gates, restaurants, and transport 🚖');
+    }
+
+  }, 1200);
 }
 
-let mapInited=false;
-function initMap(){
-  if(mapInited) return;
-  mapInited=true;
-  const entebbeLatLng = [0.0424,32.4435];
-  const map = L.map('map').setView(entebbeLatLng, 14);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap'
-  }).addTo(map);
-  L.marker(entebbeLatLng).addTo(map).bindPopup('Entebbe Intl Airport (EBB)').openPopup();
+// Map
+let mapInit = false;
+function openMap(){
+  const mapModal = new bootstrap.Modal(document.getElementById('mapModal'));
+  mapModal.show();
+  if (!mapInit) {
+    setTimeout(() => {
+      const map = L.map('map').setView([0.0424,32.4435], 14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+      }).addTo(map);
+      L.marker([0.0424,32.4435]).addTo(map).bindPopup('🛬 Entebbe Intl Airport').openPopup();
+      mapInit = true;
+    }, 500);
+  }
 }
 
-pushMessage('👋 Welcome to <strong>Entebbe Airport Assistant</strong>! Ask me about flights, navigation, or services.');
+pushMessage('👋 Welcome to <strong>PearlBot!</strong><br>Ask me about flights, weather, or navigation.');
 </script>
 </body>
 </html>
